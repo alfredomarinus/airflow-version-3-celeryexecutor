@@ -6,3 +6,5 @@ dags/.env
 dags/lib/
 logs/
 plugins/
+config/airflow.cfg
+docker-compose.override.yaml

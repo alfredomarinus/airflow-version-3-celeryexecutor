@@ -1,17 +1,18 @@
-from airflow import DAG
-from airflow.operators.bash import BashOperator
+from airflow.sdk import dag, task
 from datetime import datetime
 
-with DAG(
+@dag(
     dag_id='hello_world_dag',
     start_date=datetime(2025, 1, 1),
     schedule=None,
     catchup=False,
     tags=['testing'],
-) as dag:
-    print_hello_task = BashOperator(
-        task_id='print_hello',
-        bash_command='echo "Hello World!"',
-    )
+)
+def hello_world():
+    @task.bash
+    def print_hello():
+        return 'echo "Hello World!"'
 
-    print_hello_task
+    print_hello()
+
+hello_world()
