@@ -19,32 +19,43 @@ Apache Airflow 3 running on Docker Compose with the **CeleryExecutor** backend.
 
 - [Docker](https://docs.docker.com/get-docker/) ≥ 24.0
 - [Docker Compose](https://docs.docker.com/compose/install/) ≥ 2.20
-- At least **4 GB RAM** allocated to Docker
+- At least **8 GB RAM** allocated to Docker
 
 ## Quick Start
 
 ```bash
-# 1. Copy the example env file and edit as needed
+# 1. Clone the repository and navigate to it
+git clone <repo-url> && cd airflow-version-3-celeryexecutor
+
+# 2. Copy the example env file and edit as needed
 cp .env.example .env
 
-# 2. Start all services
-docker compose up -d
+# 3. Generate required Airflow secret keys (required for security)
+# Generate fernet key:
+python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())" | xargs -I {} sed -i '' 's/AIRFLOW__CORE__FERNET_KEY=CHANGE_ME/AIRFLOW__CORE__FERNET_KEY={}/' .env
 
-# 3. Wait for the init container to finish (~60 s on first run)
-docker compose logs -f airflow-init
+# 4. Build and start all services
+make build && make up
 
-# 4. Open the Airflow UI
-open http://localhost:8080
+# 5. Check the logs to ensure everything started properly
+make logs
 ```
 
-## Default Credentials
+> **Note:** On first run, the `airflow-init` container will initialize the database and create directories. This may take 1-2 minutes. Wait for all services to show `healthy` status.
 
-| Service | Username | Password |
-|---------|----------|----------|
-| Airflow UI | `airflow` | `airflow` |
-| Postgres | `airflow` | `airflow` |
+## Common Operations
 
-> **⚠️ Warning:** Change these in `.env` for any non-local environment.
+```bash
+make up              # Start services in background
+make down            # Stop all running services
+make restart         # Restart all running services
+make logs            # Follow all service logs
+make reset           # Stop everything, remove volumes, and restart fresh
+make status          # Show running containers
+make shell           # Open a bash shell in the API server
+make build           # Rebuild images (after Dockerfile changes)
+make clean           # Remove cache files and logs
+```
 
 ## Project Structure
 
