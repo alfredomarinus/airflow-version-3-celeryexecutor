@@ -74,17 +74,15 @@ make clean           # Remove cache files and logs
 └── README.md
 ```
 
-## Common Operations
+## Service URLs
 
-```bash
-make up          # Start services in background
-make down        # Stop services
-make restart     # Restart all services
-make logs        # Follow all service logs
-make reset       # Stop services, remove volumes, and restart fresh
-make status      # Show running containers
-make shell       # Open a bash shell in the API server
-```
+| Service | URL | Default Credentials |
+|---------|-----|-------------------|
+| **Airflow UI** | http://localhost:8080 | `airflow` / `airflow` |
+| **Flower (Celery)** | http://localhost:5555 | — |
+| **PostgreSQL** | `localhost:5432` | user: `airflow` / `airflow` |
+
+> **⚠️ Warning:** Change credentials in `.env` for any non-local environment.
 
 ## Adding DAGs
 
