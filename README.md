@@ -11,6 +11,7 @@ Apache Airflow 3 running on Docker Compose with the **CeleryExecutor** backend.
 | **airflow-dag-processor** | Parses DAG files |
 | **airflow-worker** | Celery worker that executes tasks |
 | **airflow-triggerer** | Handles deferrable operators |
+| **flower** | Celery task monitoring dashboard (port `5555`) |
 | **postgres** | Metadata database |
 | **redis** | Celery message broker |
 
