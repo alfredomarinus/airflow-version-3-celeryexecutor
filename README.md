@@ -60,7 +60,7 @@ make clean           # Remove cache files and logs
 ## Project Structure
 
 ```
-.
+airflow-version-3-celeryexecutor/
 ├── config/
 │   └── airflow.cfg          # Airflow configuration
 ├── dags/                    # Place your DAG files here
