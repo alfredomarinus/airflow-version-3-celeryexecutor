@@ -1,4 +1,4 @@
-.PHONY: up down restart logs reset status shell
+.PHONY: up down restart logs reset status shell build clean
 
 up:
 	docker compose up -d
@@ -21,3 +21,11 @@ status:
 
 shell:
 	docker compose exec airflow-api-server bash
+
+build:
+	docker compose build --no-cache
+
+clean:
+	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
+	find . -type f -name "*.pyc" -delete
+	rm -rf logs/*
