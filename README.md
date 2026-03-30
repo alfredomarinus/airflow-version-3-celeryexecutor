@@ -60,17 +60,18 @@ make clean           # Remove cache files and logs
 ## Project Structure
 
 ```
-.
-├── config/
-│   └── airflow.cfg          # Airflow configuration
-├── dags/                    # Place your DAG files here
-│   └── hello_world.py       # Example DAG
-├── logs/                    # Task execution logs (auto-generated)
-├── plugins/                 # Custom Airflow plugins
-├── .env                     # Environment variables (gitignored)
-├── .env.example             # Template for .env
-├── docker-compose.yaml      # Service definitions
-├── Makefile                 # Common operations
+airflow-version-3-celeryexecutor/
+├── airflow/
+│   ├── config/
+│   │   └── airflow.cfg          # Airflow configuration
+│   ├── dags/                    # Place your DAG files here
+│   │   └── hello_world.py       # Example DAG
+│   ├── plugins/                 # Custom Airflow plugins
+│   └── logs/                    # Task execution logs (auto-generated)
+├── .env                         # Environment variables (git-ignored)
+├── .env.example                 # Template for .env
+├── docker-compose.yaml          # Service definitions
+├── Makefile                     # Common operations
 └── README.md
 ```
 
