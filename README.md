@@ -1,6 +1,6 @@
-# Airflow 3 + CeleryExecutor
+# Airflow 3 + CeleryExecutor + MinIO Remote Logging
 
-Apache Airflow 3 running on Docker Compose with the **CeleryExecutor** backend.
+Apache Airflow 3 running on Docker Compose with the **CeleryExecutor** backend and **MinIO** for remote log storage (S3-compatible).
 
 ## Architecture
 
@@ -14,6 +14,8 @@ Apache Airflow 3 running on Docker Compose with the **CeleryExecutor** backend.
 | **flower** | Celery task monitoring dashboard (port `5555`) |
 | **postgres** | Metadata database |
 | **redis** | Celery message broker |
+| **minio** | S3-compatible object storage for remote logs (port `9000/9001`) |
+| **minio-init** | Initializes MinIO buckets on startup |
 
 ## Prerequisites
 
@@ -63,11 +65,11 @@ make clean           # Remove cache files and logs
 airflow-version-3-celeryexecutor/
 ├── airflow/
 │   ├── config/
-│   │   └── airflow.cfg          # Airflow configuration
+│   │   └── airflow.cfg          # Airflow configuration (with S3 remote logging)
 │   ├── dags/                    # Place your DAG files here
 │   │   └── hello_world.py       # Example DAG
 │   ├── plugins/                 # Custom Airflow plugins
-│   └── logs/                    # Task execution logs (auto-generated)
+│   └── logs/                    # Local task execution logs (backed up to MinIO)
 ├── .env                         # Environment variables (git-ignored)
 ├── .env.example                 # Template for .env
 ├── docker-compose.yaml          # Service definitions
@@ -81,9 +83,47 @@ airflow-version-3-celeryexecutor/
 |---------|-----|-------------------|
 | **Airflow UI** | http://localhost:8080 | `airflow` / `airflow` |
 | **Flower (Celery)** | http://localhost:5555 | — |
+| **MinIO API** | http://localhost:9000 | `minioadmin` / `minioadmin` |
+| **MinIO Console** | http://localhost:9001 | `minioadmin` / `minioadmin` |
 | **PostgreSQL** | `localhost:5432` | user: `airflow` / `airflow` |
 
 > **⚠️ Warning:** Change credentials in `.env` for any non-local environment.
+
+## MinIO & Remote Logging
+
+This setup uses **MinIO** (S3-compatible storage) to store Airflow task logs remotely. Key features:
+
+### Configuration
+- Task logs are automatically uploaded to MinIO's `airflow-logs` bucket
+- The `minio_conn` connection is automatically created via the `AIRFLOW_CONN_MINIO_CONN` environment variable
+- Remote logging is enabled in `airflow.cfg` with the `S3TaskHandler`
+
+### MinIO Console
+Access MinIO's web console at **http://localhost:9001** to:
+- Browse the `airflow-logs` bucket and task logs
+- Manage credentials and buckets
+- Monitor MinIO health and usage
+
+### Accessing Logs
+
+**From Airflow UI:**
+- All task logs in the Airflow UI will show remote logs from MinIO
+- Local logs are kept until `delete_local_logs` policy is applied
+
+**Directly from MinIO:**
+```bash
+# Using MinIO client (mc)
+docker exec minio-init mc ls myminio/airflow-logs/
+```
+
+### Configuration Details
+Edit `airflow/config/airflow.cfg` [logging] section to customize:
+```ini
+remote_logging = True                     # Enable remote logging
+remote_log_conn_id = minio_conn          # Connection ID
+remote_base_log_folder = s3://airflow-logs  # S3 bucket path
+logging_config_class = airflow.providers.amazon.aws.log_handler.S3TaskHandler
+```
 
 ## Adding DAGs
 
@@ -93,4 +133,4 @@ Place Python files in the `dags/` directory. They will be automatically picked u
 
 - **Environment variables:** Edit `.env` (see `.env.example` for reference)
 - **Airflow config:** Edit `config/airflow.cfg` — secrets are injected via env vars
-- **Extra pip packages:** Set `_PIP_ADDITIONAL_REQUIREMENTS` in `.env`
+- **Extra pip packages:** Set `_PIP_ADDITIONAL_REQUIREMENTS` in `.env` (already includes `apache-airflow-providers-amazon`)
