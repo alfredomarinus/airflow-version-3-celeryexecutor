@@ -11,6 +11,14 @@ x-airflow-common:
     AIRFLOW__CORE__INTERNAL_API_SECRET_KEY: ${AIRFLOW__CORE__INTERNAL_API_SECRET_KEY}
     AIRFLOW__API__SECRET_KEY: ${AIRFLOW__API__SECRET_KEY}
     AIRFLOW__API_AUTH__JWT_SECRET: ${AIRFLOW__API_AUTH__JWT_SECRET}
+    AIRFLOW__LOGGING__REMOTE_LOGGING: 'true'
+    AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID: minio_conn
+    AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER: s3://airflow-logs
+    AIRFLOW__LOGGING__DELETE_LOCAL_LOGS: 'false'
+    # MinIO/S3 endpoint configuration
+    AWS_ENDPOINT_URL_S3: 'http://minio:9000'
+    AWS_ACCESS_KEY_ID: ${MINIO_ROOT_USER}
+    AWS_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD}
     TZ: Asia/Kuala_Lumpur
     _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS}
     AIRFLOW_CONFIG: '/opt/airflow/config/airflow.cfg'
@@ -78,6 +86,8 @@ services:
     restart: always
     depends_on:
       <<: *airflow-common-depends-on
+      minio-init:
+        condition: service_completed_successfully
       airflow-init:
         condition: service_completed_successfully
 
@@ -94,6 +104,8 @@ services:
     restart: always
     depends_on:
       <<: *airflow-common-depends-on
+      minio-init:
+        condition: service_completed_successfully
       airflow-init:
         condition: service_completed_successfully
 
@@ -110,6 +122,8 @@ services:
     restart: always
     depends_on:
       <<: *airflow-common-depends-on
+      minio-init:
+        condition: service_completed_successfully
       airflow-init:
         condition: service_completed_successfully
 
@@ -131,6 +145,8 @@ services:
     restart: always
     depends_on:
       <<: *airflow-common-depends-on
+      minio-init:
+        condition: service_completed_successfully
       airflow-api-server:
         condition: service_healthy
       airflow-init:
@@ -149,6 +165,8 @@ services:
     restart: always
     depends_on:
       <<: *airflow-common-depends-on
+      minio-init:
+        condition: service_completed_successfully
       airflow-init:
         condition: service_completed_successfully
 
@@ -167,6 +185,8 @@ services:
     restart: always
     depends_on:
       <<: *airflow-common-depends-on
+      minio-init:
+        condition: service_completed_successfully
       airflow-init:
         condition: service_completed_successfully
 
@@ -278,6 +298,8 @@ services:
       - airflow
     depends_on:
       <<: *airflow-common-depends-on
+      minio-init:
+        condition: service_completed_successfully
 
   # flower:
   #   <<: *airflow-common
